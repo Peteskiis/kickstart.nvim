@@ -10,7 +10,7 @@ if not vim.loop.fs_stat(lazypath) then
   }
 end
 vim.opt.rtp:prepend(lazypath)
-
+require('obsidian').setup()
 require('lazy').setup({ { import = 'peteskiis.plugins' }, { import = 'peteskiis.plugins.lsp' } }, {
   checker = {
     enabled = true,

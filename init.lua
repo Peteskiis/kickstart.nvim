@@ -220,12 +220,11 @@ vim.opt.rtp:prepend(lazypath)
 --
 --  To check the current status of your plugins, run
 --    :Lazy
---
+
 --  You can press `?` in this menu for help. Use `:q` to close the window
 --
 --  To update plugins you can run
 --    :Lazy update
---
 -- NOTE: Here is where you install your plugins.
 require('lazy').setup({
   'oxfist/night-owl.nvim',
@@ -240,6 +239,43 @@ require('lazy').setup({
   -- options to `gitsigns.nvim`. This is equivalent to the following Lua:
   --   require('gitsigns').setup({ ... })
   --
+  {
+    'ray-x/go.nvim',
+    dependencies = { -- optional packages
+      'ray-x/guihua.lua',
+      'neovim/nvim-lspconfig',
+      'nvim-treesitter/nvim-treesitter',
+    },
+    config = function()
+      require('go').setup()
+      require('go.format').gofmt() -- gofmt only
+      require('go.format').goimports() -- goimports + gofmt
+    end,
+    event = { 'CmdlineEnter' },
+    ft = { 'go', 'gomod' },
+    build = ':lua require("go.install").update_all_sync()', -- if you need to install/update all binaries
+  },
+  {
+    'epwalsh/pomo.nvim',
+    version = '*', -- Recommended, use latest release instead of latest commit
+    lazy = true,
+    cmd = { 'TimerStart', 'TimerRepeat', 'TimerSession' },
+    dependencies = {
+      -- Optional, but highly recommended if you want to use the "Default" timer
+      'rcarriga/nvim-notify',
+    },
+    opts = {
+      -- See below for full list of options 👇
+    },
+  },
+  {
+    'Bekaboo/dropbar.nvim',
+    -- optional, but required for fuzzy finder support
+    dependencies = {
+      'nvim-telescope/telescope-fzf-native.nvim',
+      build = 'make',
+    },
+  },
   {
     'folke/snacks.nvim',
     priority = 1000,
@@ -256,11 +292,13 @@ require('lazy').setup({
     },
   },
   {
-    'tadmccorkle/markdown.nvim',
-    ft = 'markdown', -- or 'event = "VeryLazy"'
-    opts = {
-      -- configuration here or empty for defaults
-    },
+    'MeanderingProgrammer/render-markdown.nvim',
+    dependencies = { 'nvim-treesitter/nvim-treesitter', 'echasnovski/mini.nvim' }, -- if you use the mini.nvim suite
+    -- dependencies = { 'nvim-treesitter/nvim-treesitter', 'echasnovski/mini.icons' }, -- if you use standalone mini plugins
+    -- dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-tree/nvim-web-devicons' }, -- if you prefer nvim-web-devicons
+    ---@module 'render-markdown'
+    ---@type render.md.UserConfig
+    opts = {},
   },
   -- See `:help gitsigns` to understand what the configuration keys do
   { -- Adds git related signs to the gutter, as well as utilities for managing changes
@@ -268,86 +306,10 @@ require('lazy').setup({
     opts = {
       signs = {
         add = { text = '+' },
-        change = { text = '~' },
         delete = { text = '_' },
         topdelete = { text = '‾' },
         changedelete = { text = '~' },
       },
-    },
-  },
-  {
-    'LunarVim/breadcrumbs.nvim',
-    dependencies = {
-      { 'SmiteshP/nvim-navic' },
-    },
-  },
-  {
-    'yetone/avante.nvim',
-    event = 'VeryLazy',
-    lazy = false,
-
-    version = false, -- set this if you want to always pull the latest change
-    opts = {
-      provider = 'claude', -- Recommend using Claude
-      auto_suggestions_provider = 'claude', -- Since auto-suggestions are a high-frequency operation and therefore expensive, it is recommended to specify an inexpensive provider or even a free provider: copilot
-      claude = {
-        endpoint = 'https://api.anthropic.com',
-        model = 'claude-3-5-sonnet-20241022',
-        api_key_name = 'ANTHROPIC_API_KEY',
-        temperature = 0,
-        max_tokens = 4096,
-        -- add any opts here
-      },
-    },
-    -- if you want to build from source then do `make BUILD_FROM_SOURCE=true`
-    build = 'make',
-    -- build = "powershell -ExecutionPolicy Bypass -File Build.ps1 -BuildFromSource false" -- for windows
-    dependencies = {
-      'nvim-treesitter/nvim-treesitter',
-      'stevearc/dressing.nvim',
-      'nvim-lua/plenary.nvim',
-      'MunifTanjim/nui.nvim',
-      --- The below dependencies are optional,
-      'nvim-tree/nvim-web-devicons', -- or echasnovski/mini.icons
-      'zbirenbaum/copilot.lua', -- for providers='copilot'
-      {
-        -- support for image pasting
-        'HakonHarnes/img-clip.nvim',
-        event = 'VeryLazy',
-        opts = {
-          -- recommended settings
-          default = {
-            embed_image_as_base64 = false,
-            prompt_for_file_name = false,
-            drag_and_drop = {
-              insert_mode = true,
-            },
-            -- required for Windows users
-            use_absolute_path = true,
-          },
-        },
-      },
-      {
-        -- Make sure to set this up properly if you have lazy=true
-        'MeanderingProgrammer/render-markdown.nvim',
-        opts = {
-          file_types = { 'markdown', 'Avante' },
-        },
-        ft = { 'markdown', 'Avante' },
-      },
-    },
-  },
-  {
-    'epwalsh/pomo.nvim',
-    version = '*', -- Recommended, use latest release instead of latest commit
-    lazy = true,
-    cmd = { 'TimerStart', 'TimerRepeat', 'TimerSession' },
-    dependencies = {
-      -- Optional, but highly recommended if you want to use the "Default" timer
-      'rcarriga/nvim-notify',
-    },
-    opts = {
-      -- See below for full list of options 👇
     },
   },
   -- NOTE: Plugins can also be configured to run Lua code when they are loaded.
@@ -471,7 +433,7 @@ require('lazy').setup({
       -- do as well as how to actually do it!
 
       -- [[ Configure Telescope ]]
-      -- See `:help telescope` and `:help telescope.setup()`
+      -- See `:help telescope` and `:help telescope.require('go').setup()require('go').setup()setup()`
       require('telescope').setup {
         -- You can put your default mappings / updates / etc. in here
         --  All the info you're looking for is in `:help telescope.setup()`
@@ -690,6 +652,16 @@ require('lazy').setup({
       --     vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
       --   end
       -- end
+      -- Run gofmt + goimports on save
+
+      local format_sync_grp = vim.api.nvim_create_augroup('goimports', {})
+      vim.api.nvim_create_autocmd('BufWritePre', {
+        pattern = '*.go',
+        callback = function()
+          require('go.format').goimports()
+        end,
+        group = format_sync_grp,
+      })
 
       -- LSP servers and clients are able to communicate to each other what features they support.
       --  By default, Neovim doesn't support everything that is in the LSP specification.
@@ -708,17 +680,17 @@ require('lazy').setup({
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
-        -- clangd = {},
-        -- gopls = {},
+        clangd = {},
+        gopls = {},
         -- pyright = {},
-        -- rust_analyzer = {},
+        rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
         -- Some languages (like typescript) have entire language plugins that can be useful:
         --    https://github.com/pmizio/typescript-tools.nvim
         --
         -- But for many setups, the LSP (`ts_ls`) will work just fine
-        -- ts_ls = {},
+        ts_ls = {},
         --
 
         lua_ls = {
@@ -876,12 +848,12 @@ require('lazy').setup({
           -- Accept ([y]es) the completion.
           --  This will auto-import if your LSP supports it.
           --  This will expand snippets if the LSP sent a snippet.
-          ['<C-y>'] = cmp.mapping.confirm { select = true },
+          ['<enter>'] = cmp.mapping.confirm { select = true },
 
           -- If you prefer more traditional completion keymaps,
           -- you can uncomment the following lines
           --['<CR>'] = cmp.mapping.confirm { select = true },
-          --['<Tab>'] = cmp.mapping.select_next_item(),
+          ['<Tab>'] = cmp.mapping.select_next_item(),
           --['<S-Tab>'] = cmp.mapping.select_prev_item(),
 
           -- Manually trigger a completion from nvim-cmp.
@@ -1019,11 +991,11 @@ require('lazy').setup({
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
   -- require 'kickstart.plugins.debug',
-  -- require 'kickstart.plugins.indent_line',
-  -- require 'kickstart.plugins.lint',
-  -- require 'kickstart.plugins.autopairs',
+  require 'kickstart.plugins.indent_line',
+  require 'kickstart.plugins.lint',
+  require 'kickstart.plugins.autopairs',
   require 'kickstart.plugins.neo-tree',
-  -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
+  require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.
