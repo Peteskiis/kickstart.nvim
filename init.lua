@@ -248,8 +248,8 @@ require('lazy').setup({
     },
     config = function()
       require('go').setup()
-      require('go.format').gofmt() -- gofmt only
-      require('go.format').goimports() -- goimports + gofmt
+      -- require('go.format').gofmt() -- gofmt only
+      -- require('go.format').goimports() -- goimports + gofmt
     end,
     event = { 'CmdlineEnter' },
     ft = { 'go', 'gomod' },
