@@ -88,6 +88,12 @@ return {
           end,
         },
         {
+          event = 'neo_tree_buffer_enter',
+          handler = function()
+            vim.opt_local.relativenumber = true
+          end,
+        },
+        {
           event = 'neo_tree_window_after_close',
           handler = function(args)
             if args.position == 'left' or args.position == 'right' then
