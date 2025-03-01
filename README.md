@@ -1,9 +1,17 @@
 Clone kickstart.nvim
 
-    NOTE If following the recommended step above (i.e., forking the repo), replace nvim-lua with <your_github_username> in the commands below
+1. Linux and Mac install
 
-Linux and Mac
-
-```
+```bash
 git clone https://github.com/Peteskiis/kickstart.nvim.git "${XDG_CONFIG_HOME:-$HOME/.config}"/nvim
+```
+
+2. Brew / apt install
+
+```bash
+tree-sitter
+ripgrep
+luarocks
+fzf
+font-meslo-lg-nerd-font
 ```
