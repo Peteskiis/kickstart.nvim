@@ -91,6 +91,9 @@ vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 vim.wo.relativenumber = true
 
+-- Disable macro recording
+vim.keymap.set('n', 'q', '<Nop>', { noremap = true })
+
 -- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = true
 
