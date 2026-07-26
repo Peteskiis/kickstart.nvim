@@ -123,6 +123,45 @@ vim.opt.showmode = false
 vim.schedule(function()
   vim.opt.clipboard = 'unnamedplus'
 end)
+
+-- Route the system clipboard through OSC 52 when no *usable* native clipboard
+-- tool exists (headless box / SSH / inside the herdr multiplexer). This lets
+-- `y` reach the local machine's clipboard via a terminal escape the terminal
+-- forwards to your client.
+--
+-- Presence of xclip/xsel/wl-copy is NOT enough: on a headless server they are
+-- installed but non-functional without DISPLAY/WAYLAND_DISPLAY, and Neovim
+-- would pick one and every yank would fail. So require a display too, and
+-- treat macOS pbcopy (which needs no display) as always usable.
+--
+-- Note: OSC 52 *read* is usually unsupported by terminals, so paste with your
+-- terminal's own paste shortcut (bracketed paste) rather than `"+p`.
+local function has_usable_clipboard()
+  if vim.fn.has 'mac' == 1 and vim.fn.executable 'pbcopy' == 1 then
+    return true
+  end
+  local display = vim.env.DISPLAY or vim.env.WAYLAND_DISPLAY
+  if display and display ~= '' then
+    for _, exe in ipairs { 'wl-copy', 'xclip', 'xsel' } do
+      if vim.fn.executable(exe) == 1 then
+        return true
+      end
+    end
+  end
+  return false
+end
+
+if not has_usable_clipboard() then
+  local ok, osc52 = pcall(require, 'vim.ui.clipboard.osc52')
+  if ok then
+    vim.g.clipboard = {
+      name = 'OSC 52',
+      copy = { ['+'] = osc52.copy '+', ['*'] = osc52.copy '*' },
+      paste = { ['+'] = osc52.paste '+', ['*'] = osc52.paste '*' },
+    }
+  end
+end
+
 vim.opt.list = false
 vim.opt.listchars:append 'space:⋅'
 vim.opt.listchars:append 'eol:↴'
