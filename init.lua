@@ -460,7 +460,7 @@ require('lazy').setup({
           autolink = true,
         },
         highlight = 'RenderMarkdownLink',
-        hyperlink = 'RenderMarkdownLink',
+        hyperlink = '󰌹 ',
         wiki = {
           icon = '🔗',
           label = 'see',
