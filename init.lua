@@ -131,12 +131,15 @@ end)
 --
 -- Presence of xclip/xsel/wl-copy is NOT enough: on a headless server they are
 -- installed but non-functional without DISPLAY/WAYLAND_DISPLAY, and Neovim
--- would pick one and every yank would fail. So require a display too, and
--- treat macOS pbcopy (which needs no display) as always usable.
+-- would pick one and every yank would fail. So require a display too.
 --
--- Note: OSC 52 *read* is usually unsupported by terminals, so paste with your
--- terminal's own paste shortcut (bracketed paste) rather than `"+p`.
+-- Over SSH a native tool is never the right one, even when it works: on the
+-- Mac mini pbcopy succeeds but fills the *mini's* pasteboard, so yanks and
+-- <leader>cp never reach the laptop you are typing on.
 local function has_usable_clipboard()
+  if vim.env.SSH_TTY or vim.env.SSH_CONNECTION then
+    return false
+  end
   if vim.fn.has 'mac' == 1 and vim.fn.executable 'pbcopy' == 1 then
     return true
   end
@@ -151,13 +154,21 @@ local function has_usable_clipboard()
   return false
 end
 
+-- Paste reads Neovim's own unnamed register instead of asking the terminal:
+-- OSC 52 *read* is unsupported or permission-gated in most terminals (and
+-- herdr), so with clipboard=unnamedplus every `p` stalled waiting for a reply.
+-- Paste text copied outside Neovim with the terminal's paste shortcut.
+local function paste_unnamed()
+  return { vim.fn.split(vim.fn.getreg '"', '\n'), vim.fn.getregtype '"' }
+end
+
 if not has_usable_clipboard() then
   local ok, osc52 = pcall(require, 'vim.ui.clipboard.osc52')
   if ok then
     vim.g.clipboard = {
       name = 'OSC 52',
       copy = { ['+'] = osc52.copy '+', ['*'] = osc52.copy '*' },
-      paste = { ['+'] = osc52.paste '+', ['*'] = osc52.paste '*' },
+      paste = { ['+'] = paste_unnamed, ['*'] = paste_unnamed },
     }
   end
 end
